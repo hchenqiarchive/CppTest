@@ -14,6 +14,7 @@ struct Control : Object {
 struct Layout : Object {
 	struct Style { int layout; };
 	Layout(Style, ptr, ptr) {}
+	void AddChild(ptr) {}
 };
 
 
@@ -55,10 +56,20 @@ struct Enframe : Combine<Frames...> {
 	struct Style : Wnd::Style, Combine<Frames...>::Style {};
 
 	template<class... Ptr>
-	Enframe(Style style, Ptr...ptrs) : Combine<Frames...>(style, new Wnd(style, ptrs...)) {}
+	Enframe(Style style, Ptr...ptrs) : Combine<Frames...>(style, wnd = new Wnd(style, ptrs...)) {}
 
 	using Base = Enframe;
+
+private:
+	Wnd* wnd;
+public:
+	Wnd* operator->() { return wnd; }
 };
+
+
+//struct MyLayout : public Layout {
+//	MyLayout(Style style) : Layout(style, new Object, new Object) {}
+//};
 
 
 struct MyLayout : public Enframe<Layout, Frame1, Frame2> {
@@ -69,11 +80,15 @@ struct MyLayout : public Enframe<Layout, Frame1, Frame2> {
 			frame2 = 3;
 		}
 	};
-
-	MyLayout() : Base(Style(), new Object, new Object) {}
+	MyLayout() : Base(Style(), new Object, new Object) {
+		(*this)->AddChild(new Object);
+	}
 };
 
 
+void AddChild(ptr) {}
+
+
 int main() {
-	MyLayout mylayout;
+	AddChild(new MyLayout);
 }
