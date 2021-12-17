@@ -1,3 +1,5 @@
+// test.h
+
 #pragma once
 
 class Uncopyable {
@@ -21,3 +23,28 @@ public:
 		a++;
 	}
 };
+
+
+
+// test.cpp
+
+#include "A.h"
+
+A& A::Get() {
+	static A a(1);
+	return a;
+}
+
+A& a = A::Get();
+
+
+
+// main.cpp
+
+#include "A.h"
+
+extern A& a;
+
+int main() {
+	a.f();
+}
