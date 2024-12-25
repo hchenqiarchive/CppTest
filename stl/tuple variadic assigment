@@ -2,19 +2,15 @@
 #include <tuple>
 #include <utility> // for std::index_sequence
 
-// Helper function to assign elements from one tuple to another
-template <std::size_t... Is, typename... SrcArgs, typename... DestArgs>
-void assignTuplesHelper(const std::tuple<SrcArgs...>& source, std::tuple<DestArgs...>& destination, std::index_sequence<Is...>) {
-    // Assign each element from the source to the destination
-    ((std::get<Is>(destination) = static_cast<DestArgs>(std::get<Is>(source))), ...);
+template <typename... SrcArgs, typename... DestArgs, std::size_t... Is>
+void _move_assign_tuple_impl(std::tuple<SrcArgs...>&& source, std::tuple<DestArgs...>& destination, std::index_sequence<Is...>) {
+    ((std::get<Is>(destination) = std::move(std::get<Is>(source))), ...);
 }
 
-// Main function to assign tuples
 template <typename... SrcArgs, typename... DestArgs>
-void assignTuples(const std::tuple<SrcArgs...>& source, std::tuple<DestArgs...>& destination) {
+void move_assign_tuple(std::tuple<SrcArgs...>&& source, std::tuple<DestArgs...>& destination) {
     static_assert(sizeof...(SrcArgs) == sizeof...(DestArgs), "Tuples must have the same size");
-    // Use index sequence to handle tuple elements
-    assignTuplesHelper(source, destination, std::index_sequence_for<SrcArgs...>{});
+    _move_assign_tuple_impl(std::move(source), destination, std::index_sequence_for<SrcArgs...>{});
 }
 
 int main() {
@@ -25,7 +21,7 @@ int main() {
     std::tuple<long, float, std::string> destination;
 
     // Assign one tuple to another
-    assignTuples(source, destination);
+    move_assign_tuple(std::move(source), destination);
 
     // Print the destination tuple to verify
     std::cout << "Destination tuple: "
