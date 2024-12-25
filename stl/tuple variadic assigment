@@ -1,0 +1,37 @@
+#include <iostream>
+#include <tuple>
+#include <utility> // for std::index_sequence
+
+// Helper function to assign elements from one tuple to another
+template <std::size_t... Is, typename... SrcArgs, typename... DestArgs>
+void assignTuplesHelper(const std::tuple<SrcArgs...>& source, std::tuple<DestArgs...>& destination, std::index_sequence<Is...>) {
+    // Assign each element from the source to the destination
+    ((std::get<Is>(destination) = static_cast<DestArgs>(std::get<Is>(source))), ...);
+}
+
+// Main function to assign tuples
+template <typename... SrcArgs, typename... DestArgs>
+void assignTuples(const std::tuple<SrcArgs...>& source, std::tuple<DestArgs...>& destination) {
+    static_assert(sizeof...(SrcArgs) == sizeof...(DestArgs), "Tuples must have the same size");
+    // Use index sequence to handle tuple elements
+    assignTuplesHelper(source, destination, std::index_sequence_for<SrcArgs...>{});
+}
+
+int main() {
+    // Source tuple with different types
+    std::tuple<int, double, const char*> source(42, 3.14, "Hello");
+
+    // Destination tuple with compatible but different types
+    std::tuple<long, float, std::string> destination;
+
+    // Assign one tuple to another
+    assignTuples(source, destination);
+
+    // Print the destination tuple to verify
+    std::cout << "Destination tuple: "
+        << std::get<0>(destination) << ", "
+        << std::get<1>(destination) << ", "
+        << std::get<2>(destination) << std::endl;
+
+    return 0;
+}
