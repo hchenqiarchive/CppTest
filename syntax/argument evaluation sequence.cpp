@@ -37,3 +37,30 @@ int main() {
 	f(new A, new B);
 }
 
+
+// risk with variable number of arguments
+#include <memory>
+#include <vector>
+
+struct A {
+    A() {
+        // might throw an exception here
+    }
+};
+
+template<class T>
+class ptr : public std::unique_ptr<T> {
+public:
+    ptr(T* t) : std::unique_ptr<T>(t) {}
+};
+
+void f(auto&& ...arg) {
+    std::vector<ptr<A>> v;
+    (v.emplace_back(std::move(arg)), ...);
+}
+
+int main() {
+    f(new A, new A, new A);
+}
+
+
